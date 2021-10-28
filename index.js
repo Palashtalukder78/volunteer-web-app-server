@@ -19,12 +19,32 @@ async function run() {
         await client.connect();
         const database = client.db("volunteer");
         const eventCollection = database.collection("events");
+        const registeredCollection = database.collection("registeredUser");
 
-        //Insert data in Database
+        //Insert data in Database from add-event page
         app.post('/events', async (req, res) => {
             const events = req.body;
             const result = await eventCollection.insertOne(events);
             res.json(result)
+        })
+        //Insert data in Database from register page
+        app.post('/registered', async (req, res) => {
+            const registeredUser = req.body;
+            const result = await registeredCollection.insertOne(registeredUser);
+            res.json(result)
+        })
+        //Read data for dashboard
+        app.get('/registered', async (req, res) => {
+            const cursor = registeredCollection.find({})
+            const result = await cursor.toArray()
+            res.send(result)
+        });
+        //Delete registered User from Dashboard
+        app.delete('/registered/:id', async (req, res) => {
+            const id = req.params.id;
+            const query = { _id: ObjectId(id) };
+            const result = await registeredCollection.deleteOne(query);
+            res.json(result);
         })
         //Read data from database
         app.get('/events', async (req, res) => {
